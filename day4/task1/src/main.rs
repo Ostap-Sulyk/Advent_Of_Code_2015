@@ -1,3 +1,16 @@
+use md5;
 fn main() {
-    println!("Hello, world!");
+    // let digest = md5::compute(key.as_bytes());
+    let mut number = 0;
+    loop {
+        let digest = md5::compute((format!("{}{}", "iwrupvqb", number)).as_bytes());
+        let digest = format!("{:x}", digest);
+        let first_five = &digest[0..5];
+
+        if first_five == "00000" {
+            break;
+        }
+        number += 1;
+    }
+    println!("{}", number);
 }
