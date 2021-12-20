@@ -1,21 +1,34 @@
-fn two_double_letters_not_overlapping(s: &str) -> bool {
+fn is_nice(s: &str) -> bool {
     let chars: Vec<char> = s.chars().collect();
+
+    let mut has_two_repeating_not_overlapping: bool = false;
+    let mut has_two_the_same_letters_with_one_between: bool = false;
+
     for i in 0..chars.len() - 1 {
         let str_from_chars: String = [chars[i], chars[i + 1]].iter().collect();
         // something.matches(sub_str).count() will return number of non overlapping strings
         if s.matches(str_from_chars.as_str()).count() >= 2 {
-            return true;
+            has_two_repeating_not_overlapping = true;
+            break;
         }
     }
-    false
+    for i in 0..chars.len() - 2 {
+        if chars[i] == chars[i + 2] {
+            has_two_the_same_letters_with_one_between = true;
+            break;
+        }
+    }
+
+    has_two_the_same_letters_with_one_between && has_two_repeating_not_overlapping
 }
-// fn one_letter_with_one_between(s: &str) -> bool {
-//     unimplemented!()
-// }
 fn main() {
-    let strings: Vec<&str> = include_str!("test_input.txt").split("\n").collect();
+    let mut count_nice = 0;
+    let strings: Vec<&str> = include_str!("input.txt").split("\n").collect();
 
-    println!("{}", two_double_letters_not_overlapping(strings[0]));
-
-    // println!("{:?}", strings);
+    for string in strings.iter() {
+        if is_nice(string) {
+            count_nice += 1;
+        }
+    }
+    println!("{}", count_nice);
 }
