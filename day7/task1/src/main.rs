@@ -3,75 +3,73 @@
 use std::collections::HashMap;
 
 fn main() {
-    let mut map: HashMap<String, i16> = HashMap::new();
+    let mut map: HashMap<String, u16> = HashMap::new();
 
-    let input = include_str!("test_input.txt")
+    let input = include_str!("input.txt")
         .lines()
         .map(|x| x.split(' ').collect::<Vec<_>>())
         .collect::<Vec<_>>();
 
     for item in input {
-        if item.len() == 3 {
-            insert_or_update(&mut map, &item);
-        } else if item.len() == 4 {
-            insert_or_redirect_with_not(&mut map, &item);
-        } else if item.len() == 5 {
-            // insert_or_redirect_with_two_wires(&mut map, &item);
+        if extract_data(&mut map, &item).is_some() {
+            let data = extract_data(&mut map, &item).unwrap();
+
+            if let Some(x) = map.get_mut(data.wire.as_str()){
+                *x += data.signal;
+            } else {
+                map.insert(data.wire, data.signal);
+            }
+        };
+    }
+}
+fn extract_data(map: &mut HashMap<String, u16>, item: &Vec<&str>) -> Option<Data> {
+    match item.len() {
+        3 => {
+            let number = item[0].parse::<u16>().unwrap();
+            let wire = item[2].to_string();
+            Some(Data {
+                signal: number,
+                wire,
+            })
         }
-    }
+        4 => {
+            let number = map.get(item[1]).unwrap();
+            let wire = item[3].to_string();
+            Some(Data {
+                signal: !number,
+                wire,
+            })
+        }
+        5 => {
+            let number_from_map = map.get(item[0]).unwrap();
+            let number_from_data = item[2].parse::<u16>();
+            let number_from_data = match number_from_data {
+                Ok(x) => x,
+                Err(e) => *map.get(item[2]).unwrap(),
+            };
 
-    println!("{:#?}", map);
+            let number = perform_calculation(*number_from_map, number_from_data, item[1]);
+            let wire = item[4].to_string();
+
+            Some(Data {
+                signal: number.unwrap(),
+                wire,
+            })
+        }
+        _ => None,
+    }
+}
+struct Data {
+    signal: u16,
+    wire: String,
 }
 
-fn insert_or_update(map: &mut HashMap<String, i16>, item: &Vec<&str>) {
-    if let Some(value) = map.get_mut(item[2]) {
-        *value += item[0].parse::<i16>().unwrap();
-        return;
+fn perform_calculation(n1: u16, n2: u16, operation: &str) -> Option<u16> {
+    match operation {
+        "AND" => Some(n1 & n2),
+        "OR" => Some(n1 | n2),
+        "LSHIFT" => Some(n1 << n2),
+        "RSHIFT" => Some(n1 >> n2),
+        _ => None,
     }
-    map.insert(item[2].to_string(), item[0].parse::<i16>().unwrap());
 }
-
-fn insert_or_redirect_with_not(map: &mut HashMap<String, i16>, item: &Vec<&str>) {
-    if let Some(value) = map.get_mut(item[3]) {
-        *value += !(item[1].parse::<i16>().unwrap());
-        return;
-    }
-    map.insert(item[3].to_string(), !(*map.get(item[1]).unwrap()));
-}
-// fn insert_or_redirect_with_two_wires(map: &mut HashMap<String, i16>, item: &Vec<&str>) {
-//     let a = map.get(item[0]).unwrap().clone();
-//     let b = map.get(item[2]).unwrap().clone();
-//     
-//     match item[1] {
-//         "AND" => {
-//             if let Some(value) = map.get_mut(item[4]) {
-//                 *value += (a) & (b);
-//             } else {
-//                 map.insert(item[4].to_string(), (a) & (b));
-//             }
-//         }
-//         "OR" => {
-//             if let Some(value) = map.get_mut(item[4]) {
-//                 *value += (a) | (b);
-//             } else {
-//                 map.insert(item[4].to_string(), (a) | (b));
-//             }
-//         }
-//         "LSHIFT" => {
-//             let b = item[2].parse::<i16>().unwrap();
-//             if let Some(value) = map.get_mut(item[4]) {
-//                 *value += a << b;
-//             } else {
-//                 map.insert(item[4].to_string(), (a) << (b));
-//             }
-//         }
-//         _ => {
-//             let b = item[2].parse::<i16>().unwrap();
-//             if let Some(value) = map.get_mut(item[4]) {
-//                 *value += a >> b;
-//             } else {
-//                 map.insert(item[4].to_string(), (a) >> (b));
-//             }
-//         }
-//     }
-// }
