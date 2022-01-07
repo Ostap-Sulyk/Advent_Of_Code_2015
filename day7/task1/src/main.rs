@@ -21,6 +21,7 @@ fn main() {
             }
         };
     }
+    println!("{:?}", map);
 }
 fn extract_data(map: &mut HashMap<String, u16>, item: &Vec<&str>) -> Option<Data> {
     match item.len() {
@@ -41,14 +42,16 @@ fn extract_data(map: &mut HashMap<String, u16>, item: &Vec<&str>) -> Option<Data
             })
         }
         5 => {
-            let number_from_map = map.get(item[0]).unwrap();
-            let number_from_data = item[2].parse::<u16>();
-            let number_from_data = match number_from_data {
+            let number_from_map = match map.get(item[0]){
+                Some(x) => *x,
+                None => 0,
+            };
+            let number_from_data = match item[2].parse::<u16>() {
                 Ok(x) => x,
                 Err(e) => *map.get(item[2]).unwrap(),
             };
 
-            let number = perform_calculation(*number_from_map, number_from_data, item[1]);
+            let number = perform_calculation(number_from_map, number_from_data, item[1]);
             let wire = item[4].to_string();
 
             Some(Data {
