@@ -1,10 +1,5 @@
 use std::collections::HashMap;
 
-use regex::Match;
-
-// TODO: error is in one of these functions
-// TODO: or i need to make sure that if p -> k that i have value of p first
-
 pub fn parse_3(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
     let (a, b) = (
         retrieve_val_from_map(map, instructions[0]),
@@ -28,6 +23,14 @@ pub fn parse_2(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Optio
 
 pub fn parse_1(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
     retrieve_val_from_map(map, instructions[0])
+}
+pub fn all_wires_connected(map: &HashMap<&str, Option<u16>>) -> bool {
+    for (key, value) in map {
+        if value.is_none() {
+            return false;
+        }
+    }
+    true
 }
 
 fn retrieve_val_from_map(map: &HashMap<&str, Option<u16>>, key: &str) -> Option<u16> {
