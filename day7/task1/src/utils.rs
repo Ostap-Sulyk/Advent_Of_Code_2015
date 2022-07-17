@@ -1,33 +1,41 @@
 use std::collections::HashMap;
 
-pub fn parse_3(instructions: &[&str], map: &HashMap<&str, u16>) -> u16 {
+use regex::Match;
+
+// TODO: error is in one of these functions
+// TODO: or i need to make sure that if p -> k that i have value of p first
+
+pub fn parse_3(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
     let (a, b) = (
         retrieve_val_from_map(map, instructions[0]),
         retrieve_val_from_map(map, instructions[2]),
     );
 
-    match instructions[1].to_lowercase().as_str() {
-        "lshift" => a << b,
-        "rshift" => a >> b,
-        "and" => a & b,
-        _ => a | b,
+    match (a, b) {
+        (Some(a), Some(b)) => match instructions[1].to_lowercase().as_str() {
+            "lshift" => Some(a << b),
+            "rshift" => Some(a >> b),
+            "and" => Some(a & b),
+            _ => Some(a | b),
+        },
+        (_, _) => None,
     }
 }
 
-pub fn parse_2(instructions: &[&str], map: &HashMap<&str, u16>) -> u16 {
-    !retrieve_val_from_map(map, instructions[1])
+pub fn parse_2(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
+    retrieve_val_from_map(map, instructions[1]).map(|v| !v)
 }
 
-pub fn parse_1(instructions: &[&str], map: &HashMap<&str, u16>) -> u16 {
+pub fn parse_1(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
     retrieve_val_from_map(map, instructions[0])
 }
 
-fn retrieve_val_from_map(map: &HashMap<&str, u16>, key: &str) -> u16 {
+fn retrieve_val_from_map(map: &HashMap<&str, Option<u16>>, key: &str) -> Option<u16> {
     // this is redundant and unoptimized code, i could make it more efficient
     if map.get(key).is_some() {
         return *map.get(key).unwrap();
     } else if key.parse::<u16>().is_ok() {
-        return key.parse::<u16>().unwrap();
+        return Some(key.parse::<u16>().unwrap());
     }
-    0
+    None
 }
