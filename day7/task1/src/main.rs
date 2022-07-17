@@ -1,78 +1,56 @@
-#![allow(dead_code, unused_variables, unused_imports, unused_mut)]
+#![allow(unused, clippy::never_loop)]
+use regex::{Captures, Regex};
+use std::{alloc, collections::HashMap, fs::read_to_string};
 
-use std::collections::HashMap;
+mod utils;
+use utils::*;
+
+    /// last word in each line is wire is wire
+    /// before last word there is ->
+    /// on the left there is operation to do on that word
+
+    /// split each line in two parts to extract last wire
+    /// then delete -> from lines,
+    /// then trim the line
+    /// then split split_whitespace
+    /// if len is 3
+    ///    extract thre values wire, operation, wire
+    ///  else if len is 2
+    ///      extract use not
+    ///  else
+    ///  try to extract wire from map and assign to receiving wire
+    ///
 
 fn main() {
-    let mut map: HashMap<String, u16> = HashMap::new();
+    let data: Vec<String> = read_to_string("src/input.txt")
+        .unwrap()
+        .trim()
+        .split('\n')
+        .map(|x| x.to_string())
+        .collect();
 
-    let input = include_str!("input.txt")
-        .lines()
-        .map(|x| x.split(' ').collect::<Vec<_>>())
-        .collect::<Vec<_>>();
+    //    let wire_regex = Regex::new(r"[a-z]+").unwrap();
+    //    let operation_regex = Regex::new(r"[A-Z]+").unwrap();
 
-    for item in input {
-        if extract_data(&mut map, &item).is_some() {
-            let data = extract_data(&mut map, &item).unwrap();
+    let mut map: HashMap<&str, u16> = HashMap::new();
 
-            if let Some(x) = map.get_mut(data.wire.as_str()){
-                *x += data.signal;
-            } else {
-                map.insert(data.wire, data.signal);
-            }
-        };
-    }
-    println!("{:?}", map);
-}
-fn extract_data(map: &mut HashMap<String, u16>, item: &Vec<&str>) -> Option<Data> {
-    match item.len() {
-        3 => {
-            let number = item[0].parse::<u16>().unwrap();
-            let wire = item[2].to_string();
-            Some(Data {
-                signal: number,
-                wire,
-            })
+    for line in &data {
+        let mut instructions: Vec<&str> = line.split_whitespace().collect();
+        // retrieving and popping receiver wire
+        let reciever = instructions.pop().unwrap();
+        let mut value: u16 = 0;
+        // now lets remove "->" element
+        instructions.pop();
+
+        if instructions.len() == 3 {
+            value = parse_3(&instructions, &map);
+        } else if instructions.len() == 2 {
+            value = parse_2(&instructions, &map);
+        } else {
+            value = parse_1(&instructions, &map);
         }
-        4 => {
-            let number = map.get(item[1]).unwrap();
-            let wire = item[3].to_string();
-            Some(Data {
-                signal: !number,
-                wire,
-            })
-        }
-        5 => {
-            let number_from_map = match map.get(item[0]){
-                Some(x) => *x,
-                None => 0,
-            };
-            let number_from_data = match item[2].parse::<u16>() {
-                Ok(x) => x,
-                Err(e) => *map.get(item[2]).unwrap(),
-            };
-
-            let number = perform_calculation(number_from_map, number_from_data, item[1]);
-            let wire = item[4].to_string();
-
-            Some(Data {
-                signal: number.unwrap(),
-                wire,
-            })
-        }
-        _ => None,
+        map.insert(reciever, value);
+    
     }
-}
-struct Data {
-    signal: u16,
-    wire: String,
-}
-
-fn perform_calculation(n1: u16, n2: u16, operation: &str) -> Option<u16> {
-    match operation {
-        "AND" => Some(n1 & n2),
-        "OR" => Some(n1 | n2),
-        "LSHIFT" => Some(n1 << n2),
-        "RSHIFT" => Some(n1 >> n2),
-        _ => None,
-    }
+    println!("{}", map.get("a").unwrap());
 }
