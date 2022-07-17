@@ -1,5 +1,38 @@
 use std::collections::HashMap;
 
+pub fn connect_wires<'a>(
+    data: &'a Vec<String>,
+    map: &mut HashMap<&'a str, Option<u16>>,
+    skip: Option<&'a str>,
+) {
+    'outer: loop {
+        for line in data {
+            let mut instructions: Vec<&str> = line.split_whitespace().collect();
+            // retrieving and popping receiver wire
+            let reciever = instructions.pop().unwrap();
+            // now lets remove "->" element
+            instructions.pop();
+
+            let value;
+
+            if instructions.len() == 3 {
+                value = parse_3(&instructions, map);
+            } else if instructions.len() == 2 {
+                value = parse_2(&instructions, map);
+            } else {
+                value = parse_1(&instructions, map);
+            }
+            if skip.is_some() && reciever == skip.unwrap() {
+                continue;
+            }
+            map.insert(reciever, value);
+        }
+        if all_wires_connected(map) {
+            break 'outer;
+        }
+    }
+}
+
 pub fn parse_3(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Option<u16> {
     let (a, b) = (
         retrieve_val_from_map(map, instructions[0]),
