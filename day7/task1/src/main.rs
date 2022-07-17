@@ -1,5 +1,4 @@
-#![allow(unused, clippy::never_loop)]
-use std::{alloc, collections::HashMap, fs::read_to_string};
+use std::{collections::HashMap, fs::read_to_string};
 
 mod utils;
 use utils::*;
@@ -22,7 +21,7 @@ fn main() {
             // now lets remove "->" element
             instructions.pop();
 
-            let mut value: Option<u16> = None;
+            let value;
 
             if instructions.len() == 3 {
                 value = parse_3(&instructions, &has_signal);

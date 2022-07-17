@@ -25,7 +25,7 @@ pub fn parse_1(instructions: &[&str], map: &HashMap<&str, Option<u16>>) -> Optio
     retrieve_val_from_map(map, instructions[0])
 }
 pub fn all_wires_connected(map: &HashMap<&str, Option<u16>>) -> bool {
-    for (key, value) in map {
+    for value in map.values() {
         if value.is_none() {
             return false;
         }
