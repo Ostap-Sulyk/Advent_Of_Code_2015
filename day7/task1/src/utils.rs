@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 // does all the processing
-pub fn connect_wires<'a>(
-    data: &'a Vec<String>,
-    map: &mut HashMap<&'a str, Option<u16>>,
-) {
+pub fn connect_wires<'a>(data: &'a Vec<String>, map: &mut HashMap<&'a str, Option<u16>>) {
     'outer: loop {
         for line in data {
             let mut instructions: Vec<&str> = line.split_whitespace().collect();

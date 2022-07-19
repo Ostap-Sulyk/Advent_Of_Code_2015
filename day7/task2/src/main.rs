@@ -11,15 +11,20 @@ fn main() {
         .map(|x| x.to_string())
         .collect();
 
+    // creating hash map to store wires
     let mut first_map: HashMap<&str, Option<u16>> = HashMap::new();
-    let mut second_map: HashMap<&str, Option<u16>> = HashMap::new();
-    // overriding b with a
 
+    // processing
     connect_wires(&data, &mut first_map, None);
 
-    second_map.insert("b", *first_map.get("a").unwrap());
+    // saving "b" and value from "a"
+    let (k, v) = ("b", *first_map.get("a").unwrap());
 
-    connect_wires(&data, &mut second_map, Some("b"));
+    // clearing map
+    first_map.clear();
+    first_map.insert(k, v);
 
-    println!("{:#?}", second_map.get("a").unwrap().unwrap())
+    connect_wires(&data, &mut first_map, Some("b"));
+
+    println!("{:#?}", first_map.get("a").unwrap().unwrap())
 }
